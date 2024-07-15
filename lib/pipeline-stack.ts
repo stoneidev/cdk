@@ -10,7 +10,7 @@ export class PipelineStack extends cdk.Stack {
 
     // CodeCommit 리포지토리 생성
     const repo = new codecommit.Repository(this, "AmplifyRepo", {
-      repositoryName: "amplify-cdk-repo",
+      repositoryName: "amplify-stonei-repo",
       description: "CodeCommit repository for Amplify CDK project",
     });
 
