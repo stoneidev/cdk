@@ -12,7 +12,7 @@ export class LambdaConstruct extends Construct {
     // Lambda 함수 생성
     const helloLambda = new lambda.Function(this, "HelloHandler", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      code: lambda.Code.fromAsset("src/lambda"),
+      code: lambda.Code.fromAsset("lambda"),
       handler: "hello.handler",
     });
 
