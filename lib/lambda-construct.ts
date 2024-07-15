@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import * as path from "path";
 import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
@@ -12,7 +13,7 @@ export class LambdaConstruct extends Construct {
     // Lambda 함수 생성
     const helloLambda = new lambda.Function(this, "HelloHandler", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      code: lambda.Code.fromAsset("lambda"),
+      code: lambda.Code.fromAsset(path.join(__dirname, "..", "src", "lambda")),
       handler: "hello.handler",
     });
 
