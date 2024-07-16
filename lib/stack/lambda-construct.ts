@@ -42,22 +42,6 @@ export class LambdaConstruct extends Construct {
     const helloResource = api.root.addResource("hello");
     helloResource.addMethod("GET", helloIntegration);
 
-    // OPTIONS 메서드가 이미 존재하는지 확인
-    if (!helloResource.getResource("OPTIONS")) {
-      helloResource.addCorsPreflight({
-        allowOrigins: ["*"],
-        allowMethods: ["GET", "OPTIONS"],
-        allowHeaders: [
-          "Content-Type",
-          "X-Amz-Date",
-          "Authorization",
-          "X-Api-Key",
-          "X-Amz-Security-Token",
-        ],
-        allowCredentials: true,
-      });
-    }
-
     this.apiUrl = api.url;
 
     // API Gateway URL을 CloudFormation 출력으로 내보내기
