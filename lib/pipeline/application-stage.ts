@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { AmplifyStack } from "../stack/amplify-stack";
+import { AmplifyStack } from "../amplify-stack";
 
 export class ApplicationStage extends cdk.Stage {
   constructor(scope: Construct, id: string, props?: cdk.StageProps) {
