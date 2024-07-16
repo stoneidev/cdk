@@ -47,7 +47,7 @@ export class AmplifyL3Construct extends Construct {
       iamServiceRole: amplifyRole.roleArn,
       environmentVariables: [
         {
-          name: "API_GW_URL",
+          name: "NEXT_PUBLIC_API_GW_URL",
           value: props.apiUrl,
         },
       ],
@@ -61,7 +61,7 @@ export class AmplifyL3Construct extends Construct {
             build:
               commands:
                 - npm run build
-                - env | grep -e API_GW_URL >> .env.production
+                - env | grep -e NEXT_PUBLIC_API_GW_URL >> .env.production
           artifacts:
             baseDirectory: .next
             files:
