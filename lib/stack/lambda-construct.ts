@@ -19,7 +19,7 @@ export class LambdaConstruct extends Construct {
       handler: "hello.handler",
     });
 
-    // API Gateway 생성
+    // API Gateway 생성 및 CORS 설정
     const api = new apigateway.RestApi(this, "HelloApi", {
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
@@ -36,17 +36,27 @@ export class LambdaConstruct extends Construct {
     });
 
     // Lambda 통합 생성
-    const helloIntegration = new apigateway.LambdaIntegration(helloLambda, {
-      proxy: true,
-      allowTestInvoke: true,
-    });
+    const helloIntegration = new apigateway.LambdaIntegration(helloLambda);
 
     // 리소스 및 메서드 추가
     const helloResource = api.root.addResource("hello");
     helloResource.addMethod("GET", helloIntegration);
 
-    // CORS 설정을 모든 메서드에 적용
-    this.addCorsOptions(helloResource);
+    // OPTIONS 메서드가 이미 존재하는지 확인
+    if (!helloResource.getResource("OPTIONS")) {
+      helloResource.addCorsPreflight({
+        allowOrigins: ["*"],
+        allowMethods: ["GET", "OPTIONS"],
+        allowHeaders: [
+          "Content-Type",
+          "X-Amz-Date",
+          "Authorization",
+          "X-Api-Key",
+          "X-Amz-Security-Token",
+        ],
+        allowCredentials: true,
+      });
+    }
 
     this.apiUrl = api.url;
 
@@ -56,41 +66,5 @@ export class LambdaConstruct extends Construct {
       description: "API Gateway URL",
       exportName: "ApiGatewayUrl",
     });
-  }
-
-  private addCorsOptions(apiResource: apigateway.IResource) {
-    apiResource.addMethod(
-      "OPTIONS",
-      new apigateway.MockIntegration({
-        integrationResponses: [
-          {
-            statusCode: "200",
-            responseParameters: {
-              "method.response.header.Access-Control-Allow-Headers":
-                "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-              "method.response.header.Access-Control-Allow-Origin": "'*'",
-              "method.response.header.Access-Control-Allow-Methods":
-                "'OPTIONS,GET,PUT,POST,DELETE'",
-            },
-          },
-        ],
-        passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
-        requestTemplates: {
-          "application/json": '{"statusCode": 200}',
-        },
-      }),
-      {
-        methodResponses: [
-          {
-            statusCode: "200",
-            responseParameters: {
-              "method.response.header.Access-Control-Allow-Headers": true,
-              "method.response.header.Access-Control-Allow-Methods": true,
-              "method.response.header.Access-Control-Allow-Origin": true,
-            },
-          },
-        ],
-      }
-    );
   }
 }
