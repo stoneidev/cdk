@@ -61,6 +61,7 @@ export class AmplifyL3Construct extends Construct {
             build:
               commands:
                 - npm run build
+                - env | grep -e API_GW_URL >> .env.production
           artifacts:
             baseDirectory: .next
             files:
