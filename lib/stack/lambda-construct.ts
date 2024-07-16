@@ -19,8 +19,21 @@ export class LambdaConstruct extends Construct {
       handler: "hello.handler",
     });
 
-    // API Gateway 생성 및 Lambda 연동
-    const api = new apigateway.RestApi(this, "HelloApi");
+    // API Gateway 생성 및 CORS 설정
+    const api = new apigateway.RestApi(this, "HelloApi", {
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: [
+          "Content-Type",
+          "X-Amz-Date",
+          "Authorization",
+          "X-Api-Key",
+          "X-Amz-Security-Token",
+        ],
+        allowCredentials: true,
+      },
+    });
 
     // Lambda 통합 생성
     const helloIntegration = new apigateway.LambdaIntegration(helloLambda);
@@ -28,39 +41,6 @@ export class LambdaConstruct extends Construct {
     // 리소스 및 메서드 추가
     const helloResource = api.root.addResource("hello");
     helloResource.addMethod("GET", helloIntegration);
-    helloResource.addMethod(
-      "OPTIONS",
-      new apigateway.MockIntegration({
-        integrationResponses: [
-          {
-            statusCode: "200",
-            responseParameters: {
-              "method.response.header.Access-Control-Allow-Headers":
-                "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-              "method.response.header.Access-Control-Allow-Methods":
-                "'GET,OPTIONS'",
-              "method.response.header.Access-Control-Allow-Origin": "'*'",
-            },
-          },
-        ],
-        passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
-        requestTemplates: {
-          "application/json": '{"statusCode": 200}',
-        },
-      }),
-      {
-        methodResponses: [
-          {
-            statusCode: "200",
-            responseParameters: {
-              "method.response.header.Access-Control-Allow-Headers": true,
-              "method.response.header.Access-Control-Allow-Methods": true,
-              "method.response.header.Access-Control-Allow-Origin": true,
-            },
-          },
-        ],
-      }
-    );
 
     this.apiUrl = api.url;
 
