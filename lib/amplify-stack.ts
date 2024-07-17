@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { AmplifyL3Construct } from "./stack/amplify-l3-construct";
 import { LambdaConstruct } from "./stack/lambda-construct";
+import { CustomUserPool } from "./stack/Authenticate";
 
 export class AmplifyStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -13,6 +14,24 @@ export class AmplifyStack extends cdk.Stack {
       repositoryName: "stonei-frontend",
       branchName: "main",
       apiUrl: lambdaConstruct.apiUrl,
+    });
+
+    // Cognito UserPool 생성
+    const cognitoUserPool = new CustomUserPool(this, "StoneiUserPool", {
+      userPoolName: "stonei-user-pool",
+      selfSignUpEnabled: true,
+      signInAliases: { email: true },
+      standardAttributes: {
+        email: { required: true, mutable: true },
+      },
+      passwordPolicy: {
+        minLength: 8,
+        requireLowercase: true,
+        requireUppercase: true,
+        requireDigits: true,
+        requireSymbols: true,
+      },
+      mfa: cdk.aws_cognito.Mfa.OPTIONAL,
     });
 
     // 출력
