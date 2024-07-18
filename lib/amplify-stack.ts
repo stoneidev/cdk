@@ -17,7 +17,6 @@ export class AmplifyStack extends cdk.Stack {
       signInAliases: { email: true },
       standardAttributes: {
         email: { required: true, mutable: true },
-        nickname: { required: true, mutable: true },
       },
       passwordPolicy: {
         minLength: 8,
