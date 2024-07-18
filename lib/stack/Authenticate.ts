@@ -43,7 +43,7 @@ export class CustomUserPool extends Construct {
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       email: props.emailSettings,
-      autoVerify: { email: false },
+      autoVerify: { email: true },
     });
 
     // 클라이언트 추가
@@ -54,7 +54,6 @@ export class CustomUserPool extends Construct {
       },
     });
 
-    // 도메인 추가
     this.userPool.addDomain("CognitoDomain", {
       cognitoDomain: {
         domainPrefix: `${props.userPoolName}-domain`,
