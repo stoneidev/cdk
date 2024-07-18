@@ -1,7 +1,9 @@
 import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
-import { Construct } from "constructs";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as path from "path";
 
+import { Construct } from "constructs";
 export interface CustomUserPoolProps {
   userPoolName: string;
   selfSignUpEnabled?: boolean;
@@ -44,6 +46,15 @@ export class CustomUserPool extends Construct {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       email: props.emailSettings,
       autoVerify: { email: true },
+      lambdaTriggers: {
+        preSignUp: new lambda.Function(this, 'PreSignUpFunction', {
+          runtime: lambda.Runtime.NODEJS_20_X,
+          handler: 'index.handler',
+          code: lambda.Code.fromAsset(
+            path.join(__dirname, "..", "..", "src", "cognito")
+          ),
+        }),
+      }
     });
 
     // 클라이언트 추가
