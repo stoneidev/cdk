@@ -43,7 +43,7 @@ export class CustomUserPool extends Construct {
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       email: props.emailSettings,
-      autoVerify: { email: true },
+      autoVerify: { email: false },
     });
 
     // 클라이언트 추가
