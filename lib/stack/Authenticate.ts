@@ -26,7 +26,6 @@ export class CustomUserPool extends Construct {
       signInAliases: props.signInAliases ?? { username: true, email: true },
       standardAttributes: props.standardAttributes ?? {
         email: { required: true, mutable: true },
-        nickname: { required: true, mutable: true },
       },
       customAttributes: props.customAttributes,
       passwordPolicy: props.passwordPolicy ?? {
