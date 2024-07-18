@@ -26,6 +26,7 @@ export class CustomUserPool extends Construct {
       signInAliases: props.signInAliases ?? { username: true, email: true },
       standardAttributes: props.standardAttributes ?? {
         email: { required: true, mutable: true },
+        nickname: { required: true, mutable: true },
       },
       customAttributes: props.customAttributes,
       passwordPolicy: props.passwordPolicy ?? {
@@ -42,7 +43,10 @@ export class CustomUserPool extends Construct {
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      email: props.emailSettings, // 이메일 설정을 여기에 추가
+      email: props.emailSettings,
+      autoVerify: {
+        email: false,
+      },
     });
 
     // 클라이언트 추가
