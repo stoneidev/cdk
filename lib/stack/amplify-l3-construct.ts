@@ -8,6 +8,8 @@ export interface AmplifyL3Props {
   repositoryName: string;
   branchName: string;
   apiUrl: string;
+  userPoolId: string;
+  userPoolWebClient: string;
 }
 
 export class AmplifyL3Construct extends Construct {
@@ -50,6 +52,22 @@ export class AmplifyL3Construct extends Construct {
           name: "NEXT_PUBLIC_API_GW_URL",
           value: props.apiUrl,
         },
+        {
+          name: "NEXT_PUBLIC_USER_POOL_ID",
+          value: props.userPoolId,
+        },
+        {
+          name: "NEXT_PUBLIC_USER_POOL_WEB_CLIENT_ID",
+          value: props.userPoolWebClient,
+        },
+        {
+          name: "NEXT_PUBLIC_REGION",
+          value: "ap-northeast-2",
+        },
+        {
+          name: "NEXT_PUBLIC_AUTHENTICATION_FLOW_TYPE",
+          value: "USER_SRP_AUTH",
+        },
       ],
       buildSpec: cdk.Fn.sub(`
         version: 1.0
@@ -61,7 +79,7 @@ export class AmplifyL3Construct extends Construct {
             build:
               commands:
                 - npm run build
-                - env | grep -e NEXT_PUBLIC_API_GW_URL >> .env.production
+                - env | grep -e NEXT_PUBLIC_ >> .env.production
           artifacts:
             baseDirectory: .next
             files:

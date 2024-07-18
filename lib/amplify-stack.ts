@@ -10,12 +10,6 @@ export class AmplifyStack extends cdk.Stack {
 
     const lambdaConstruct = new LambdaConstruct(this, "lambda");
 
-    const amplifyL3 = new AmplifyL3Construct(this, "stonei-amplify", {
-      repositoryName: "stonei-frontend",
-      branchName: "main",
-      apiUrl: lambdaConstruct.apiUrl,
-    });
-
     // Cognito UserPool 생성
     const cognitoUserPool = new CustomUserPool(this, "StoneiUserPool", {
       userPoolName: "stonei-user-pool",
@@ -32,6 +26,14 @@ export class AmplifyStack extends cdk.Stack {
         requireSymbols: true,
       },
       mfa: cdk.aws_cognito.Mfa.OPTIONAL,
+    });
+
+    const amplifyL3 = new AmplifyL3Construct(this, "stonei-amplify", {
+      repositoryName: "stonei-frontend",
+      branchName: "main",
+      apiUrl: lambdaConstruct.apiUrl,
+      userPoolId: cognitoUserPool.userPool.userPoolId,
+      userPoolWebClient: cognitoUserPool.userPoolClient.userPoolClientId,
     });
 
     // 출력

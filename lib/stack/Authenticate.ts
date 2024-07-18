@@ -15,6 +15,7 @@ export interface CustomUserPoolProps {
 
 export class CustomUserPool extends Construct {
   public readonly userPool: cognito.UserPool;
+  public readonly userPoolClient: cognito.UserPoolClient;
 
   constructor(scope: Construct, id: string, props: CustomUserPoolProps) {
     super(scope, id);
@@ -45,7 +46,7 @@ export class CustomUserPool extends Construct {
     });
 
     // 클라이언트 추가
-    const userPoolClient = this.userPool.addClient("app-client", {
+    this.userPoolClient = this.userPool.addClient("app-client", {
       authFlows: {
         userPassword: true,
         userSrp: true,
@@ -61,7 +62,7 @@ export class CustomUserPool extends Construct {
 
     new cdk.CfnOutput(this, "UserPoolId", { value: this.userPool.userPoolId });
     new cdk.CfnOutput(this, "UserPoolClientId", {
-      value: userPoolClient.userPoolClientId,
+      value: this.userPoolClient.userPoolClientId,
     });
   }
 }
