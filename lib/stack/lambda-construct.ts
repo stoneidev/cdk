@@ -3,6 +3,7 @@ import * as path from "path";
 import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 export class LambdaConstruct extends Construct {
   public readonly apiUrl: string;
@@ -18,6 +19,17 @@ export class LambdaConstruct extends Construct {
       ),
       handler: "hello.handler",
     });
+
+    helloLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: [
+          "ses:SendEmail",
+          "ses:SendRawEmail",
+          "ses:SendTemplatedEmail",
+        ],
+        resources: ["*"],
+      })
+    );
 
     // API Gateway 생성 및 CORS 설정
     const api = new apigateway.RestApi(this, "HelloApi", {
