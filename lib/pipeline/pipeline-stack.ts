@@ -24,7 +24,7 @@ export class PipelineStack extends cdk.Stack {
 
     // 스테이징 환경에 AmplifyStack 배포
     const stagingStage = pipeline.addStage(
-      new ApplicationStage(this, "Staging", {
+      new ApplicationStage(this, "ServerlessStack", {
         env: {
           account: process.env.CDK_DEFAULT_ACCOUNT,
           region: process.env.CDK_DEFAULT_REGION,

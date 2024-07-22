@@ -5,7 +5,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
 
-export class LambdaConstruct extends Construct {
+export class BackendConstruct extends Construct {
   public readonly apiUrl: string;
 
   constructor(scope: Construct, id: string) {

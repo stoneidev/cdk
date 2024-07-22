@@ -12,7 +12,7 @@ export interface AmplifyL3Props {
   userPoolWebClient: string;
 }
 
-export class AmplifyL3Construct extends Construct {
+export class FrontendConstruct extends Construct {
   public readonly appId: string;
   public readonly repoUrl: string;
 

@@ -48,7 +48,7 @@ export class CustomUserPool extends Construct {
       autoVerify: { email: true },
       lambdaTriggers: {
         preSignUp: new lambda.Function(this, 'PreSignUpFunction', {
-          runtime: lambda.Runtime.NODEJS_20_X,
+          runtime: lambda.Runtime.NODEJS_20_X ,
           handler: 'index.handler',
           code: lambda.Code.fromAsset(
             path.join(__dirname, "..", "..", "src", "cognito")
