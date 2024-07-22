@@ -11,6 +11,15 @@ export class LambdaConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
+    // Lambda 레이어 생성
+    const lambdaLayer = new lambda.LayerVersion(this, "MyLayer", {
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "..", "..", "src", "layer", "layer.zip")
+      ),
+      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
+      description: "A layer for my Lambda function",
+    });
+
     // Lambda 함수 생성
     const helloLambda = new lambda.Function(this, "HelloHandler", {
       runtime: lambda.Runtime.NODEJS_20_X,
