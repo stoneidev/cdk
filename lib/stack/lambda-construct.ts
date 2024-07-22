@@ -27,6 +27,7 @@ export class LambdaConstruct extends Construct {
         path.join(__dirname, "..", "..", "src", "lambda")
       ),
       handler: "hello.handler",
+      layers: [lambdaLayer],
     });
 
     helloLambda.addToRolePolicy(
