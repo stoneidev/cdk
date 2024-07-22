@@ -1,10 +1,10 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { BackendConstruct } from "./stack/backend";
-import { CustomUserPool } from "./stack/Authenticate";
-import { FrontendConstruct } from "./stack/frontend";
+import { BackendConstruct } from "./construct/backend";
+import { FrontendConstruct } from "./construct/frontend";
+import { CustomUserPool } from "./construct/authenticate";
 
-export class AmplifyStack extends cdk.Stack {
+export class ServerlessStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
