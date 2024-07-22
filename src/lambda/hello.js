@@ -49,7 +49,7 @@ sendMail = async () => {
       },
       Subject: { Data: "Test Email" }, // 이메일 제목
     },
-    Source: "jngkim@amazon.com", // 발신자 이메일 주소
+    Source: "admin@mall.awsome.info", // 발신자 이메일 주소
   };
 
   try {
