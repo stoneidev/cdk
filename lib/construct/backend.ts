@@ -57,7 +57,10 @@ export class BackendConstruct extends Construct {
       ),
       handler: "public.handler",
       layers: [lambdaLayer],
+      insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0, // Lambda Insights 활성화
     });
+
+    publicLambda.addToRolePolicy(insightsPolicy);
 
     // API Gateway 생성 및 CORS 설정
     const api = new apigateway.RestApi(this, "ServerlessAPI", {
