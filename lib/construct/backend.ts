@@ -4,29 +4,34 @@ import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as cognito from "aws-cdk-lib/aws-cognito";
+
+export interface BackendProps {
+  userPool: cognito.UserPool;
+}
 
 export class BackendConstruct extends Construct {
   public readonly apiUrl: string;
 
-  constructor(scope: Construct, id: string) {
+  constructor(scope: Construct, id: string, props: BackendProps) {
     super(scope, id);
 
     // Lambda 레이어 생성
-    const lambdaLayer = new lambda.LayerVersion(this, "MyLayer", {
+    const lambdaLayer = new lambda.LayerVersion(this, "AWSSDK-Layer", {
       code: lambda.Code.fromAsset(
         path.join(__dirname, "..", "..", "src", "layer", "layer.zip")
       ),
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-      description: "A layer for my Lambda function",
+      description: "A layer for using AWS SDK in  Lambda function",
     });
 
     // Lambda 함수 생성
-    const helloLambda = new lambda.Function(this, "HelloHandler", {
+    const helloLambda = new lambda.Function(this, "ServerlessHandler", {
       runtime: lambda.Runtime.NODEJS_20_X,
       code: lambda.Code.fromAsset(
         path.join(__dirname, "..", "..", "src", "lambda")
       ),
-      handler: "hello.handler",
+      handler: "serverless.handler",
       layers: [lambdaLayer],
     });
 
@@ -42,7 +47,7 @@ export class BackendConstruct extends Construct {
     );
 
     // API Gateway 생성 및 CORS 설정
-    const api = new apigateway.RestApi(this, "HelloApi", {
+    const api = new apigateway.RestApi(this, "ServerlessAPI", {
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
@@ -60,9 +65,21 @@ export class BackendConstruct extends Construct {
     // Lambda 통합 생성
     const helloIntegration = new apigateway.LambdaIntegration(helloLambda);
 
+    // Cognito Authorizer 생성
+    const authorizer = new apigateway.CognitoUserPoolsAuthorizer(
+      this,
+      "CognitoAuthorizer",
+      {
+        cognitoUserPools: [props.userPool],
+      }
+    );
+
     // 리소스 및 메서드 추가
     const helloResource = api.root.addResource("hello");
-    helloResource.addMethod("GET", helloIntegration);
+    helloResource.addMethod("GET", helloIntegration, {
+      authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
 
     this.apiUrl = api.url;
 

@@ -3,12 +3,11 @@ import { Construct } from "constructs";
 import { BackendConstruct } from "./construct/backend";
 import { FrontendConstruct } from "./construct/frontend";
 import { CustomUserPool } from "./construct/authenticate";
+import * as cognito from "aws-cdk-lib/aws-cognito";
 
 export class ServerlessStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-
-    const lambdaConstruct = new BackendConstruct(this, "lambda");
 
     // Cognito UserPool 생성
     const cognitoUserPool = new CustomUserPool(this, "StoneiUserPool", {
@@ -26,6 +25,10 @@ export class ServerlessStack extends cdk.Stack {
         requireSymbols: true,
       },
       mfa: cdk.aws_cognito.Mfa.OPTIONAL,
+    });
+
+    const lambdaConstruct = new BackendConstruct(this, "lambda", {
+      userPool: cognitoUserPool.userPool,
     });
 
     const amplifyL3 = new FrontendConstruct(this, "stonei-amplify", {
