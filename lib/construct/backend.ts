@@ -81,7 +81,7 @@ export class BackendConstruct extends Construct {
     });
 
     const publicResource = api.root.addResource("public");
-    helloResource.addMethod("GET", publicIntegration);
+    publicResource.addMethod("GET", publicIntegration);
 
     this.apiUrl = api.url;
 
