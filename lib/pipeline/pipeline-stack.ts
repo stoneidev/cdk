@@ -16,7 +16,7 @@ export class PipelineStack extends cdk.Stack {
 
     // 파이프라인 생성
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
-      pipelineName: "Serverless Pipeline",
+      pipelineName: "Serverless-Pipeline",
       synth: new pipelines.ShellStep("Synth", {
         input: pipelines.CodePipelineSource.codeCommit(repo, "main"),
         commands: ["npm ci", "npm run build", "npx cdk synth"],
