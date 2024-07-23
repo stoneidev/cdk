@@ -26,7 +26,7 @@ export class BackendConstruct extends Construct {
     });
 
     // Lambda 함수 생성
-    const helloLambda = new lambda.Function(this, "ServerlessHandler", {
+    const salesLambda = new lambda.Function(this, "ServerlessHandler", {
       runtime: lambda.Runtime.NODEJS_20_X,
       code: lambda.Code.fromAsset(
         path.join(__dirname, "..", "..", "src", "lambda")
@@ -61,7 +61,7 @@ export class BackendConstruct extends Construct {
     });
 
     // Lambda 통합 생성
-    const helloIntegration = new apigateway.LambdaIntegration(helloLambda);
+    const salesIntegration = new apigateway.LambdaIntegration(salesLambda);
     const publicIntegration = new apigateway.LambdaIntegration(publicLambda);
 
     // Cognito Authorizer 생성
@@ -74,8 +74,8 @@ export class BackendConstruct extends Construct {
     );
 
     // 리소스 및 메서드 추가
-    const helloResource = api.root.addResource("hello");
-    helloResource.addMethod("GET", helloIntegration, {
+    const helloResource = api.root.addResource("sales");
+    helloResource.addMethod("GET", salesIntegration, {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });

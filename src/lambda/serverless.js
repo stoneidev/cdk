@@ -1,6 +1,5 @@
 const AWS = require("aws-sdk");
 
-
 exports.handler = async function (event, context) {
   console.log("EVENT: \n" + JSON.stringify(event, null, 2));
 
@@ -29,7 +28,10 @@ exports.handler = async function (event, context) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      message: `Hello, CDK! You've hit ${event.path}`,
+      data: {
+        eaningsData: [355, 390, 300, 350, 390, 180, 355, 390],
+        expenseData: [280, 250, 325, 215, 250, 310, 280, 250],
+      },
     }),
   };
 };
