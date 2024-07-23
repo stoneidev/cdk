@@ -28,9 +28,15 @@ exports.handler = async function (event, context) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      data: {
-        eaningsData: [355, 390, 300, 350, 390, 180, 355, 390],
-        expenseData: [280, 250, 325, 215, 250, 310, 280, 250],
+      sales: {
+        eanings: Array.from(
+          { length: 8 },
+          () => Math.floor(Math.random() * (500 - 150 + 1)) + 150
+        ),
+        expense: Array.from(
+          { length: 8 },
+          () => Math.floor(Math.random() * (500 - 150 + 1)) + 150
+        ),
       },
     }),
   };
