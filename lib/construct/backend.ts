@@ -3,8 +3,8 @@ import * as path from "path";
 import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
-import * as iam from "aws-cdk-lib/aws-iam";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 export interface BackendProps {
   userPool: cognito.UserPool;
@@ -15,6 +15,18 @@ export class BackendConstruct extends Construct {
 
   constructor(scope: Construct, id: string, props: BackendProps) {
     super(scope, id);
+
+    // Lambda Insights 권한 추가
+    const insightsPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        "cloudwatch:PutMetricData",
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+      ],
+      resources: ["*"],
+    });
 
     // Lambda 레이어 생성
     const lambdaLayer = new lambda.LayerVersion(this, "AWSSDK-Layer", {
@@ -33,7 +45,10 @@ export class BackendConstruct extends Construct {
       ),
       handler: "serverless.handler",
       layers: [lambdaLayer],
+      insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0, // Lambda Insights 활성화
     });
+
+    salesLambda.addToRolePolicy(insightsPolicy);
 
     const publicLambda = new lambda.Function(this, "PublicHandler", {
       runtime: lambda.Runtime.NODEJS_20_X,
