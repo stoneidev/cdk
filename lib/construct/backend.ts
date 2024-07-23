@@ -35,16 +35,14 @@ export class BackendConstruct extends Construct {
       layers: [lambdaLayer],
     });
 
-    helloLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: [
-          "ses:SendEmail",
-          "ses:SendRawEmail",
-          "ses:SendTemplatedEmail",
-        ],
-        resources: ["*"],
-      })
-    );
+    const publicLambda = new lambda.Function(this, "PublicHandler", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "..", "..", "src", "lambda")
+      ),
+      handler: "public.handler",
+      layers: [lambdaLayer],
+    });
 
     // API Gateway 생성 및 CORS 설정
     const api = new apigateway.RestApi(this, "ServerlessAPI", {
@@ -64,6 +62,7 @@ export class BackendConstruct extends Construct {
 
     // Lambda 통합 생성
     const helloIntegration = new apigateway.LambdaIntegration(helloLambda);
+    const publicIntegration = new apigateway.LambdaIntegration(publicLambda);
 
     // Cognito Authorizer 생성
     const authorizer = new apigateway.CognitoUserPoolsAuthorizer(
@@ -80,6 +79,9 @@ export class BackendConstruct extends Construct {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });
+
+    const publicResource = api.root.addResource("public");
+    helloResource.addMethod("GET", publicIntegration);
 
     this.apiUrl = api.url;
 
