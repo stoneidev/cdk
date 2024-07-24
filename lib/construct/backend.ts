@@ -46,6 +46,7 @@ export class BackendConstruct extends Construct {
       handler: "serverless.handler",
       layers: [lambdaLayer],
       insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0, // Lambda Insights 활성화
+      memorySize: 512,
     });
 
     salesLambda.addToRolePolicy(insightsPolicy);
@@ -58,6 +59,7 @@ export class BackendConstruct extends Construct {
       handler: "public.handler",
       layers: [lambdaLayer],
       insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0, // Lambda Insights 활성화
+      memorySize: 512,
     });
 
     publicLambda.addToRolePolicy(insightsPolicy);
