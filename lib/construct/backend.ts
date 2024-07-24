@@ -38,7 +38,8 @@ export class BackendConstruct extends Construct {
     });
 
     // Lambda 함수 생성
-    const salesLambda = new lambda.Function(this, "ServerlessHandler", {
+    const salesLambda = new lambda.Function(this, "SalesLambda", {
+      functionName: "SalesLambda",
       runtime: lambda.Runtime.NODEJS_20_X,
       code: lambda.Code.fromAsset(
         path.join(__dirname, "..", "..", "src", "lambda")
