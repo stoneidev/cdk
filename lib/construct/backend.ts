@@ -5,9 +5,11 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 
 export interface BackendProps {
   userPool: cognito.UserPool;
+  table: dynamodb.Table;
 }
 
 export class BackendConstruct extends Construct {
@@ -65,6 +67,17 @@ export class BackendConstruct extends Construct {
 
     publicLambda.addToRolePolicy(insightsPolicy);
 
+    const dynamoDbPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:GetItem",
+        "dynamodb:Query",
+      ],
+      resources: [props.table.tableArn],
+    });
+
     const kanbanLambda = new lambda.Function(this, "KanbanHandler", {
       runtime: lambda.Runtime.NODEJS_20_X,
       code: lambda.Code.fromAsset(
@@ -76,7 +89,8 @@ export class BackendConstruct extends Construct {
       memorySize: 512,
     });
 
-    publicLambda.addToRolePolicy(insightsPolicy);
+    kanbanLambda.addToRolePolicy(insightsPolicy);
+    kanbanLambda.addToRolePolicy(dynamoDbPolicy);
 
     // API Gateway 생성 및 CORS 설정
     const api = new apigateway.RestApi(this, "ServerlessAPI", {

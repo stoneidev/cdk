@@ -4,6 +4,7 @@ import { BackendConstruct } from "./construct/backend";
 import { FrontendConstruct } from "./construct/frontend";
 import { CustomUserPool } from "./construct/authenticate";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+import { Repository } from "./construct/repository";
 
 export class ServerlessStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -27,8 +28,11 @@ export class ServerlessStack extends cdk.Stack {
       mfa: cdk.aws_cognito.Mfa.OPTIONAL,
     });
 
+    const repository = new Repository(this, "kanbanRepository");
+
     const lambdaConstruct = new BackendConstruct(this, "lambda", {
       userPool: cognitoUserPool.userPool,
+      table: repository.table,
     });
 
     const amplifyL3 = new FrontendConstruct(this, "stonei-amplify", {
