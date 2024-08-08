@@ -65,6 +65,19 @@ export class BackendConstruct extends Construct {
 
     publicLambda.addToRolePolicy(insightsPolicy);
 
+    const kanbanLambda = new lambda.Function(this, "KanbanHandler", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "..", "..", "src", "lambda")
+      ),
+      handler: "kanban.handler",
+      layers: [lambdaLayer],
+      insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0, // Lambda Insights 활성화
+      memorySize: 512,
+    });
+
+    publicLambda.addToRolePolicy(insightsPolicy);
+
     // API Gateway 생성 및 CORS 설정
     const api = new apigateway.RestApi(this, "ServerlessAPI", {
       defaultCorsPreflightOptions: {
@@ -84,6 +97,7 @@ export class BackendConstruct extends Construct {
     // Lambda 통합 생성
     const salesIntegration = new apigateway.LambdaIntegration(salesLambda);
     const publicIntegration = new apigateway.LambdaIntegration(publicLambda);
+    const kanbanIntegration = new apigateway.LambdaIntegration(kanbanLambda);
 
     // Cognito Authorizer 생성
     const authorizer = new apigateway.CognitoUserPoolsAuthorizer(
@@ -103,6 +117,12 @@ export class BackendConstruct extends Construct {
 
     const publicResource = api.root.addResource("public");
     publicResource.addMethod("GET", publicIntegration);
+
+    const kanbanResource = api.root.addResource("kanban");
+    kanbanResource.addMethod("GET", kanbanIntegration, {
+      authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
 
     this.apiUrl = api.url;
 
