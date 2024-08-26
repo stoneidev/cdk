@@ -19,11 +19,29 @@ export class FrontendConstruct extends Construct {
   constructor(scope: Construct, id: string, props: AmplifyL3Props) {
     super(scope, id);
 
+    // Create an IAM Role that gives Amplify permission to pull from CodeCommit
+    const amplifyRole = new iam.Role(this, "AmplifyRole", {
+      assumedBy: new iam.ServicePrincipal("amplify.amazonaws.com"),
+      inlinePolicies: {
+        CodeCommit: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              actions: ["codecommit:GitPull"],
+              effect: iam.Effect.ALLOW,
+              resources: ["*"],
+            }),
+          ],
+        }),
+      },
+    });
+
+    // Amplify 앱 생성
     const amplifyApp = new amplify.CfnApp(this, "AmplifyL3App", {
       name: "stonei-web",
       accessToken: cdk.SecretValue.secretsManager("GithubToken").unsafeUnwrap(),
       repository: "https://github.com/stoneidev/serverless-admin",
       platform: "WEB_COMPUTE",
+      iamServiceRole: amplifyRole.roleArn,
       environmentVariables: [
         {
           name: "NEXT_PUBLIC_API_GW_URL",
