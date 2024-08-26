@@ -123,8 +123,8 @@ export class BackendConstruct extends Construct {
     );
 
     // 리소스 및 메서드 추가
-    const helloResource = api.root.addResource("sales");
-    helloResource.addMethod("GET", salesIntegration, {
+    const salesResource = api.root.addResource("sales");
+    salesResource.addMethod("GET", salesIntegration, {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });

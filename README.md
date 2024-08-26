@@ -98,72 +98,214 @@ output = json
 
 ## Serverless Stack
 
+### Backend
+
+```typescript
+    // Lambda 레이어 생성
+    const lambdaLayer = new lambda.LayerVersion(this, "AWSSDK-Layer", {
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "..", "..", "src", "layer", "layer.zip")
+      ),
+      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
+      description: "A layer for using AWS SDK in  Lambda function",
+    });
+
+    // Lambda 함수 생성
+    const salesLambda = new lambda.Function(this, "SalesLambda", {
+      functionName: "SalesLambda",
+      runtime: lambda.Runtime.NODEJS_20_X,
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "..", "..", "src", "lambda")
+      ),
+      handler: "serverless.handler",
+      layers: [lambdaLayer],
+      insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0, // Lambda Insights 활성화
+      memorySize: 512,
+    });
+
+    salesLambda.addToRolePolicy(insightsPolicy);
+```
+
+설명해야 하는 부분만 설명하자면 AWS SDK를 사용하기 위해서는 위와 같이 Layer를 구성하여 Lambda에 입력하도록 합니다. 그리고 Handler를 위와 같이 해준다면 ../../src/lambda/serverless.js의 handler method를 이벤트를 수신하면 실행하게 됩니다. 또한 insightVersion 을 위와 같이 입력하면 추가적인 모니터링을 위한 insight가 설정됩니다.
+
+```typescript
+    const authorizer = new apigateway.CognitoUserPoolsAuthorizer(
+      this,
+      "CognitoAuthorizer",
+      {
+        cognitoUserPools: [props.userPool],
+      }
+    );
+
+    const salesResource = api.root.addResource("sales");
+    salesResource.addMethod("GET", salesIntegration, {
+      authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
+
+    const publicResource = api.root.addResource("public");
+    publicResource.addMethod("GET", publicIntegration);
+```
+
+그리고 위와 같이 인증이 필요한 경우는 위와 같이 authorizer 를 설정하여 인증을 수행하도록 합니다. 하지만 만들다 보면 모든 사람들에게 오픈되어야 하는 API가 필요합니다. 이런 경우는 위의 publicResource 와 같이 설정하도록 합니다. API에 대한 인증은 Backend에서 처리하지 않고 API Gateway에서 처리하도록 합니다. 
+
+```javascript
+const AWS = require("aws-sdk");
+
+exports.handler = async function (event, context) {
+
+  // CORS 헤더 설정
+  const headers = {
+    "Access-Control-Allow-Origin": "*", // 또는 특정 도메인
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Headers":
+      "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+  };
+
+  // OPTIONS 요청 처리 (CORS preflight)
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 200,
+      headers: headers,
+      body: "",
+    };
+  }
+
+  // 실제 요청 처리
+  return {
+    statusCode: 200,
+    headers: {
+      ...headers,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      sales: {
+        eanings: Array.from(
+          { length: 8 },
+          () => Math.floor(Math.random() * (500 - 150 + 1)) + 150
+        ),
+        expense: Array.from(
+          { length: 8 },
+          () => Math.floor(Math.random() * (500 - 150 + 1)) + 150
+        ),
+      },
+    }),
+  };
+};
+
+```
+
+CORS 설정을 위한 Header를 설정하도록 합니다. 
+
+exports.handler = async function (event, context)의 구문은 이벤트를 수신할 경우 해당 메소드가 이를 처리한다는 의미입니다. 이후 return에서 Frontend를 위한 데이터를 만들어줍니다. 
+
+### Frontend
+
 ```typescript
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { BackendConstruct } from "./construct/backend";
-import { FrontendConstruct } from "./construct/frontend";
-import { CustomUserPool } from "./construct/authenticate";
-import * as cognito from "aws-cdk-lib/aws-cognito";
-import { Repository } from "./construct/repository";
+import * as amplify from "aws-cdk-lib/aws-amplify";
+import * as iam from "aws-cdk-lib/aws-iam";
 
-export class ServerlessStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+export interface AmplifyL3Props {
+  repositoryName: string;
+  branchName: string;
+  apiUrl: string;
+  userPoolId: string;
+  userPoolWebClient: string;
+}
 
-    // Cognito UserPool 생성
-    const cognitoUserPool = new CustomUserPool(this, "StoneiUserPool", {
-      userPoolName: "admin-user-pool",
-      selfSignUpEnabled: true,
-      signInAliases: { email: true },
-      standardAttributes: {
-        email: { required: true, mutable: true },
+export class FrontendConstruct extends Construct {
+  public readonly appId: string;
+  public readonly repoUrl: string;
+
+  constructor(scope: Construct, id: string, props: AmplifyL3Props) {
+    super(scope, id);
+
+    // Create an IAM Role that gives Amplify permission to pull
+    const amplifyRole = new iam.Role(this, "AmplifyRole", {
+      assumedBy: new iam.ServicePrincipal("amplify.amazonaws.com"),
+      inlinePolicies: {
+        CodeCommit: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              actions: ["codecommit:GitPull"],
+              effect: iam.Effect.ALLOW,
+              resources: ["*"],
+            }),
+          ],
+        }),
       },
-      passwordPolicy: {
-        minLength: 8,
-        requireLowercase: true,
-        requireUppercase: true,
-        requireDigits: true,
-        requireSymbols: true,
-      },
-      mfa: cdk.aws_cognito.Mfa.OPTIONAL,
     });
 
-    const repository = new Repository(this, "kanbanRepository");
-
-    const lambdaConstruct = new BackendConstruct(this, "lambda", {
-      userPool: cognitoUserPool.userPool,
-      table: repository.table,
+    // Amplify 앱 생성
+    const amplifyApp = new amplify.CfnApp(this, "AmplifyL3App", {
+      name: "stonei-web",
+      accessToken: cdk.SecretValue.secretsManager("GithubToken").unsafeUnwrap(),
+      repository: "https://github.com/stoneidev/serverless-admin",
+      platform: "WEB_COMPUTE",
+      iamServiceRole: amplifyRole.roleArn,
+      environmentVariables: [
+        {
+          name: "NEXT_PUBLIC_API_GW_URL",
+          value: props.apiUrl,
+        },
+        {
+          name: "NEXT_PUBLIC_USER_POOL_ID",
+          value: props.userPoolId,
+        },
+        {
+          name: "NEXT_PUBLIC_USER_POOL_WEB_CLIENT_ID",
+          value: props.userPoolWebClient,
+        },
+        {
+          name: "NEXT_PUBLIC_REGION",
+          value: "ap-northeast-2",
+        },
+        {
+          name: "NEXT_PUBLIC_AUTHENTICATION_FLOW_TYPE",
+          value: "USER_SRP_AUTH",
+        },
+      ],
+      buildSpec: cdk.Fn.sub(`
+        version: 1.0
+        frontend:
+          phases:
+            preBuild:
+              commands:
+                - npm ci
+            build:
+              commands:
+                - npm run build
+                - env | grep -e NEXT_PUBLIC_ >> .env.production
+          artifacts:
+            baseDirectory: .next
+            files:
+              - '**/*'
+          cache:
+            paths:
+              - node_modules/**/*
+              - .next/cache/**/*
+                `),
     });
 
-    const amplifyL3 = new FrontendConstruct(this, "stonei-amplify", {
-      repositoryName: "stonei-frontend",
-      branchName: "main",
-      apiUrl: lambdaConstruct.apiUrl,
-      userPoolId: cognitoUserPool.userPool.userPoolId,
-      userPoolWebClient: cognitoUserPool.userPoolClient.userPoolClientId,
+    // 브랜치 추가
+    const mainBranch = new amplify.CfnBranch(this, "MainBranch", {
+      appId: amplifyApp.attrAppId,
+      branchName: props.branchName,
+      stage: "PRODUCTION",
     });
 
-    // 출력
-    new cdk.CfnOutput(this, "AmplifyAppId", {
-      value: amplifyL3.appId,
-      description: "Amplify App ID",
-    });
-
-    new cdk.CfnOutput(this, "CodeCommitRepoUrl", {
-      value: amplifyL3.repoUrl,
-      description: "CodeCommit Repository URL",
-    });
-
-    new cdk.CfnOutput(this, "LambdaApiUrl", {
-      value: lambdaConstruct.apiUrl,
-      description: "Lambda API URL",
-    });
+    this.appId = amplifyApp.attrAppId;
+    this.repoUrl = "https://github.com/stoneidev/serverless-admin";
   }
 }
+
 ```
 AWS Cognito를 만드는 CustomUserpool, Amazon Dynamodb 를 생성하는 Repository 이 두개는 별도의 dependency가 없이 리소스를 생성하게 됩니다. 
 
 이후 Backend를 구성할 때에는 앞에서 생성한 인증에 대한 리소스와 데이터 저장을 위한 리소스를 파라미터로 받아 벡엔드를 구성하게 됩니다. 
 
-Frontend의 경우는 
+Frontend의 경우는 주로 Amplify 리소스를 구성하게 됩니다. 위 소스를 간다하게 본다면 입력 받은, API Gateway, User Pool ID등을 입력 받아 Frontend를 구성하게 됩니다. 환경변수를 주입을 받고 해당 환경 변수를 .env.production에 넣어 주어 nextjs는 이를 가지고 기동하게 됩니다. 
+
+React(nextjs) 소스에 대해서는 여기서는 별도로 설명하지 않습니다. 

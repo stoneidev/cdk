@@ -2,7 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as amplify from "aws-cdk-lib/aws-amplify";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as codecommit from "aws-cdk-lib/aws-codecommit";
 
 export interface AmplifyL3Props {
   repositoryName: string;
@@ -19,7 +18,7 @@ export class FrontendConstruct extends Construct {
   constructor(scope: Construct, id: string, props: AmplifyL3Props) {
     super(scope, id);
 
-    // Create an IAM Role that gives Amplify permission to pull from CodeCommit
+    // Create an IAM Role that gives Amplify permission to pull
     const amplifyRole = new iam.Role(this, "AmplifyRole", {
       assumedBy: new iam.ServicePrincipal("amplify.amazonaws.com"),
       inlinePolicies: {

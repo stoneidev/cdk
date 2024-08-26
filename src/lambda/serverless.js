@@ -1,8 +1,6 @@
 const AWS = require("aws-sdk");
 
 exports.handler = async function (event, context) {
-  console.log("EVENT: \n" + JSON.stringify(event, null, 2));
-
   // CORS 헤더 설정
   const headers = {
     "Access-Control-Allow-Origin": "*", // 또는 특정 도메인
