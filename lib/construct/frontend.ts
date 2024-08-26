@@ -96,6 +96,7 @@ export class FrontendConstruct extends Construct {
     const mainBranch = new amplify.CfnBranch(this, "MainBranch", {
       appId: amplifyApp.attrAppId,
       branchName: props.branchName,
+      stage: "PRODUCTION",
     });
 
     this.appId = amplifyApp.attrAppId;
