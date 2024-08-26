@@ -308,3 +308,12 @@ AWS Cognito를 만드는 CustomUserpool, Amazon Dynamodb 를 생성하는 Reposi
 Frontend의 경우는 주로 Amplify 리소스를 구성하게 됩니다. 위 소스를 간다하게 본다면 입력 받은, API Gateway, User Pool ID등을 입력 받아 Frontend를 구성하게 됩니다. 환경변수를 주입을 받고 해당 환경 변수를 .env.production에 넣어 주어 nextjs는 이를 가지고 기동하게 됩니다.
 
 React(nextjs) 소스에 대해서는 여기서는 별도로 설명하지 않습니다.
+
+## TODO
+
+- .env/config 등을 이용한 Resoruce Name / Tag 구성
+- Lambda Power Tool 을 이용한 모니터링/로깅/성능 튜닝(https://docs.powertools.aws.dev/lambda/typescript/latest/)
+- Node.js Pattern 적용
+- AWS Cognito 인증에 대해서는 일부 이중인증을 예제를 위해서 풀어놓았습니다.
+- Infrastructure에 대한 단위 테스트 적용
+- React(nextjs)에 대해서는 학습이 필요합니다.
