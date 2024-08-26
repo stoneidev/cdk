@@ -12,7 +12,7 @@ export class ServerlessStack extends cdk.Stack {
 
     // Cognito UserPool 생성
     const cognitoUserPool = new CustomUserPool(this, "StoneiUserPool", {
-      userPoolName: "stonei-user-pool",
+      userPoolName: "admin-user-pool",
       selfSignUpEnabled: true,
       signInAliases: { email: true },
       standardAttributes: {
