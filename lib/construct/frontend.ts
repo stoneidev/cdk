@@ -45,7 +45,7 @@ export class FrontendConstruct extends Construct {
     const amplifyApp = new amplify.CfnApp(this, "AmplifyL3App", {
       name: "stonei-web",
       accessToken: cdk.SecretValue.secretsManager("GithubToken").unsafeUnwrap(),
-      repository: "https://github.com/stoneidev/react-admin",
+      repository: "https://github.com/stoneidev/serverless-admin",
       platform: "WEB_COMPUTE",
       iamServiceRole: amplifyRole.roleArn,
       environmentVariables: [
