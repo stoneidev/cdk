@@ -83,17 +83,16 @@ output = json
   - frontend.ts : AWS Amplify를 이용한 Frontend 소스들이 작성되어 있습니다. 특히 nextjs를 지원하도록 설정이 되어 있습니다.
   - repository.ts : 추후에 Amazon Dynamodb를 사용할 수 있도록 저장소에 관련된 소스들이 작성되어 있습니다.
 - lib/pipeline/* : CDK로 작성된 인프라 소스에 대한 CI/CD Pipeline을 구성하고 소스가 변경이 되면 해당 소스가 자동적으로 배포되도록 구성하는 소스들이 들어 있습니다.
-  - pipeline-stack.ts : Github을 소스로 한 빌드 파이프 라인을 구성합니다. 
+  - pipeline-stack.ts : Github을 소스로 한 빌드 파이프 라인을 구성합니다.
   - application-stage.ts : CICD Pipeline 중에 실제 Stack에 대한 배포를 수행하는 Stage를 구성합니다.
-- lib/serverless-stack.ts : L3 Construct(lib/construct/*)를 이용하여 우리가 배포할 Stack을 구성합니다. 이는 이후에 application-stage.ts에서 수행되어 Stack을 배포합니다. 
-
+- lib/serverless-stack.ts : L3 Construct(lib/construct/*)를 이용하여 우리가 배포할 Stack을 구성합니다. 이는 이후에 application-stage.ts에서 수행되어 Stack을 배포합니다.
 
 - src/* : 실제 Backend를 구성하는 비즈니스 소스 및 설정 소스들을 포합니다.
   - src/cognito/index.js : AWS Cognito에서 Sign Up 수행시 간단한 절차를 수행할 수 있도록 비밀번호 설정시 자동으로 confirm 하게 합니다.
   - src/lambda/kanban.js : 칸반 그래프를 그리는 Backend 로직을 구성합니다.
   - src/lambda/public.js : "Say Hello" 모든 사람에게 public에게 보여지는 소스를 작성합니다.
   - src/lambda/serverless.js : Sale 그래프를 그리는 소스를 반환합니다. 그래프를 그리는 Random 값을 반환합니다.
-  - src/lambda/layer/* : 람다가 사용한 Third Party Library에 대한 Package가 포함되어 있습니다. 
+  - src/lambda/layer/* : 람다가 사용한 Third Party Library에 대한 Package가 포함되어 있습니다.
 - test/serverless.test.ts : 인프라에 대한 테스트 파일이 작성되어 있습니다.
 
 ## Serverless Stack
@@ -147,7 +146,7 @@ output = json
     publicResource.addMethod("GET", publicIntegration);
 ```
 
-그리고 위와 같이 인증이 필요한 경우는 위와 같이 authorizer 를 설정하여 인증을 수행하도록 합니다. 하지만 만들다 보면 모든 사람들에게 오픈되어야 하는 API가 필요합니다. 이런 경우는 위의 publicResource 와 같이 설정하도록 합니다. API에 대한 인증은 Backend에서 처리하지 않고 API Gateway에서 처리하도록 합니다. 
+그리고 위와 같이 인증이 필요한 경우는 위와 같이 authorizer 를 설정하여 인증을 수행하도록 합니다. 하지만 만들다 보면 모든 사람들에게 오픈되어야 하는 API가 필요합니다. 이런 경우는 위의 publicResource 와 같이 설정하도록 합니다. API에 대한 인증은 Backend에서 처리하지 않고 API Gateway에서 처리하도록 합니다.
 
 ```javascript
 const AWS = require("aws-sdk");
@@ -195,9 +194,9 @@ exports.handler = async function (event, context) {
 
 ```
 
-CORS 설정을 위한 Header를 설정하도록 합니다. 
+CORS 설정을 위한 Header를 설정하도록 합니다.
 
-exports.handler = async function (event, context)의 구문은 이벤트를 수신할 경우 해당 메소드가 이를 처리한다는 의미입니다. 이후 return에서 Frontend를 위한 데이터를 만들어줍니다. 
+exports.handler = async function (event, context)의 구문은 이벤트를 수신할 경우 해당 메소드가 이를 처리한다는 의미입니다. 이후 return에서 Frontend를 위한 데이터를 만들어줍니다.
 
 ### Frontend
 
@@ -300,12 +299,12 @@ export class FrontendConstruct extends Construct {
     this.repoUrl = "https://github.com/stoneidev/serverless-admin";
   }
 }
-
 ```
-AWS Cognito를 만드는 CustomUserpool, Amazon Dynamodb 를 생성하는 Repository 이 두개는 별도의 dependency가 없이 리소스를 생성하게 됩니다. 
 
-이후 Backend를 구성할 때에는 앞에서 생성한 인증에 대한 리소스와 데이터 저장을 위한 리소스를 파라미터로 받아 벡엔드를 구성하게 됩니다. 
+AWS Cognito를 만드는 CustomUserpool, Amazon Dynamodb 를 생성하는 Repository 이 두개는 별도의 dependency가 없이 리소스를 생성하게 됩니다.
 
-Frontend의 경우는 주로 Amplify 리소스를 구성하게 됩니다. 위 소스를 간다하게 본다면 입력 받은, API Gateway, User Pool ID등을 입력 받아 Frontend를 구성하게 됩니다. 환경변수를 주입을 받고 해당 환경 변수를 .env.production에 넣어 주어 nextjs는 이를 가지고 기동하게 됩니다. 
+이후 Backend를 구성할 때에는 앞에서 생성한 인증에 대한 리소스와 데이터 저장을 위한 리소스를 파라미터로 받아 벡엔드를 구성하게 됩니다.
 
-React(nextjs) 소스에 대해서는 여기서는 별도로 설명하지 않습니다. 
+Frontend의 경우는 주로 Amplify 리소스를 구성하게 됩니다. 위 소스를 간다하게 본다면 입력 받은, API Gateway, User Pool ID등을 입력 받아 Frontend를 구성하게 됩니다. 환경변수를 주입을 받고 해당 환경 변수를 .env.production에 넣어 주어 nextjs는 이를 가지고 기동하게 됩니다.
+
+React(nextjs) 소스에 대해서는 여기서는 별도로 설명하지 않습니다.
