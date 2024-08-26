@@ -9,16 +9,18 @@ export class PipelineStack extends cdk.Stack {
     super(scope, id, props);
 
     // CodeCommit 리포지토리 생성
-    const repo = new codecommit.Repository(this, "AmplifyRepo", {
-      repositoryName: "amplify-stonei-repo",
-      description: "CodeCommit repository for Amplify CDK project",
-    });
-
+    const githubSource = pipelines.CodePipelineSource.gitHub(
+      "stoneidev/cdk", // GitHub 리포지토리 이름
+      "main", // 브랜치 이름
+      {
+        authentication: cdk.SecretValue.secretsManager("GithubToken"), // GitHub Personal Access Token
+      }
+    );
     // 파이프라인 생성
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
       pipelineName: "Serverless-Pipeline",
       synth: new pipelines.ShellStep("Synth", {
-        input: pipelines.CodePipelineSource.codeCommit(repo, "main"),
+        input: githubSource,        
         commands: ["npm ci", "npm run build", "npx cdk synth"],
       }),
     });
