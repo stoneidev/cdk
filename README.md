@@ -311,7 +311,7 @@ React(nextjs) 소스에 대해서는 여기서는 별도로 설명하지 않습�
 
 ## TODO
 
-- .env/config 등을 이용한 Resoruce Name / Tag 구성
+- .env/config 등을 이용한 Resoruce Name / Tag 구성 : https://stoneidev.netlify.app/posts/serverless-handson/
 - Lambda Power Tool 을 이용한 모니터링/로깅/성능 튜닝(https://docs.powertools.aws.dev/lambda/typescript/latest/)
 - Node.js Pattern 적용
 - AWS Cognito 인증에 대해서는 일부 이중인증을 예제를 위해서 풀어놓았습니다.
