@@ -161,7 +161,7 @@ export class BackendConstruct extends Construct {
     });
 
     const invokeResource = api.root.addResource("invoke");
-    kanbanResource.addMethod("POST", invokeIntegration, {
+    invokeResource.addMethod("POST", invokeIntegration, {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });
