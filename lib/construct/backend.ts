@@ -39,6 +39,14 @@ export class BackendConstruct extends Construct {
       description: "A layer for using AWS SDK in  Lambda function",
     });
 
+    const pythonLayer = new lambda.LayerVersion(this, "boto3-Layer", {
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "..", "..", "src", "layer", "boto3.zip")
+      ),
+      compatibleRuntimes: [lambda.Runtime.PYTHON_3_11],
+      description: "A layer for using AWS SDK in  Lambda function",
+    });
+
     // Lambda 함수 생성
     const salesLambda = new lambda.Function(this, "SalesLambda", {
       functionName: "SalesLambda",
@@ -73,6 +81,7 @@ export class BackendConstruct extends Construct {
         path.join(__dirname, "..", "..", "src", "lambda")
       ),
       handler: "invoke.lambda_handler",
+      layers: [pythonLayer],
       insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0, // Lambda Insights 활성화
       memorySize: 512,
     });
