@@ -33,7 +33,7 @@ output = json
 > cd cdk
 
 # Package 설치
-> npm i 
+> npm install
 
 # CDK 배포
 > cdk bootstrap
