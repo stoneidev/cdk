@@ -67,6 +67,18 @@ export class BackendConstruct extends Construct {
 
     publicLambda.addToRolePolicy(insightsPolicy);
 
+    const invokeLambda = new lambda.Function(this, "InvokeHandler", {
+      runtime: lambda.Runtime.PYTHON_3_11,
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "..", "..", "src", "lambda")
+      ),
+      handler: "invoke.lambda_handler",
+      insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0, // Lambda Insights 활성화
+      memorySize: 512,
+    });
+
+    invokeLambda.addToRolePolicy(insightsPolicy);
+
     const dynamoDbPolicy = new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: [
@@ -112,6 +124,7 @@ export class BackendConstruct extends Construct {
     const salesIntegration = new apigateway.LambdaIntegration(salesLambda);
     const publicIntegration = new apigateway.LambdaIntegration(publicLambda);
     const kanbanIntegration = new apigateway.LambdaIntegration(kanbanLambda);
+    const invokeIntegration = new apigateway.LambdaIntegration(invokeLambda);
 
     // Cognito Authorizer 생성
     const authorizer = new apigateway.CognitoUserPoolsAuthorizer(
@@ -134,6 +147,12 @@ export class BackendConstruct extends Construct {
 
     const kanbanResource = api.root.addResource("kanban");
     kanbanResource.addMethod("GET", kanbanIntegration, {
+      authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
+
+    const invokeResource = api.root.addResource("invoke");
+    kanbanResource.addMethod("POST", invokeIntegration, {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });
