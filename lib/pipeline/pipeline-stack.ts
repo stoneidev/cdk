@@ -10,10 +10,10 @@ export class PipelineStack extends cdk.Stack {
 
     // CodeCommit 리포지토리 생성
     const githubSource = pipelines.CodePipelineSource.gitHub(
-      "stoneidev/cdk", // GitHub 리포지토리 이름
+      "lg-ensol/cdk", // GitHub 리포지토리 이름
       "main", // 브랜치 이름
       {
-        authentication: cdk.SecretValue.secretsManager("GithubToken"), // GitHub Personal Access Token
+        authentication: cdk.SecretValue.secretsManager("sm-eu-aics-token"), // GitHub Personal Access Token
       }
     );
     // 파이프라인 생성
